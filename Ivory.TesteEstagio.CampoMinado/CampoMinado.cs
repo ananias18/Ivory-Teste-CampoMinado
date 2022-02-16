@@ -1,215 +1,356 @@
-﻿namespace Ivory.TesteEstagio.CampoMinado
+using System;
+
+namespace Ivory.TesteEstagio.CampoMinado
 {
-    public class CampoMinado
+    class Program
     {
-        private enum StatusTipo
+        public static void Main(string[] args)
         {
-            Aberto,
-            Vitoria,
-            GameOver
-        }
+            var campoMinado = new CampoMinado();
+            Console.WriteLine("Início do jogo\n=========");
+            Console.WriteLine(campoMinado.Tabuleiro);
 
-        private StatusTipo Status = StatusTipo.Aberto;
+            // Realize sua codificação a partir deste ponto, boa sorte!
 
-        // O tabuleiro inicia com 34 casas abertas. Ao abrir 71 casas(casas que não possuem bombas) o jogo é ganho.
-        private int JogoTotalDeCasasAbertas = 34;
 
-        private readonly string[,] Solucao = new string[9, 9] {
-            { "0", "0", "0", "0", "0", "0", "0", "1", "*" },
-            { "0", "0", "0", "0", "0", "0", "0", "1", "1" },
-            { "1", "2", "2", "1", "0", "0", "0", "0", "0" },
-            { "1", "*", "*", "3", "2", "2", "1", "1", "0" },
-            { "1", "2", "3", "*", "*", "4", "*", "2", "1" },
-            { "0", "0", "1", "3", "*", "*", "3", "*", "2" },
-            { "0", "0", "0", "1", "2", "2", "2", "2", "*" }, 
-            { "0", "0", "0", "0", "0", "0", "0", "1", "1" },
-            { "0", "0", "0", "0", "0", "0", "0", "0", "0" }
-        };
+            int linha, coluna, m, l, x, y;
 
-        private string[,] Jogo = new string[9, 9] {
-            { "0", "0", "0", "0", "0", "0", "0", "1", "-" },
-            { "0", "0", "0", "0", "0", "0", "0", "1", "1" },
-            { "1", "2", "2", "1", "0", "0", "0", "0", "0" },
-            { "-", "-", "-", "3", "2", "2", "1", "1", "0" },
-            { "-", "-", "-", "-", "-", "-", "-", "2", "1" },
-            { "-", "-", "-", "-", "-", "-", "-", "-", "-" },
-            { "-", "-", "-", "-", "-", "-", "-", "-", "-" },
-            { "-", "-", "-", "-", "-", "-", "-", "-", "-" },
-            { "-", "-", "-", "-", "-", "-", "-", "-", "-" }
-        };
+            Console.WriteLine(9);
+            linha = int.Parse(Console.ReadLine());
 
-        /// <summary>
-        /// Status atual do jogo após você realizar uma abertura de uma casa.
-        /// 0 - Jogo em aberto, continue procurando as casas que não possuem bombas;
-        /// 1 - Vitoria, você encontrou todas as casas que não possui bomba;
-        /// 2 - GameOver, você encontrou uma bomba.
-        /// </summary>
-        public int JogoStatus
-        {
-            get
+            Console.WriteLine(9);
+            coluna = int.Parse(Console.ReadLine());
             {
-                return (int)Status;
-            }
-        }
 
-        /// <summary>
-        /// Retorna o tabuleiro atual em modo texto.
-        /// </summary>
-        public string Tabuleiro 
-        {
-            get
-            {
-                var tabuleiro = "";
+                Minado[,] casa = new Minado[linha, coluna];
 
-                for (var x = 0; x < 9; x++)
+                int[,] jogo = new int[linha, coluna];
+                for (int a = 0; a < linha; a++)
                 {
-                    for (var y = 0; y < 9; y++)
+                    for (int c = coluna - 1; c >= 0; c--)
                     {
-                        tabuleiro += Jogo[x, y];
-                    }
-
-                    if (x != 8)
-                    {
-                        tabuleiro += "\r\n";
+                        casa[a, c] = new Minado(); //* inicialmente todos os valores do tabuleiro são 0//*
                     }
                 }
 
-                return tabuleiro;
-            }
-        }
+                Random bomba = new Random(); //*declaração de um número randômico//* 
 
-        /// <summary>
-        /// Método responsável por abrir uma casa do tabuleiro e alterar o status do jogo para:
-        /// - GameOver(2) caso você abra uma bomba;
-        /// - Aberto(0) caso ainda não tenha encontrado todas as casas que não possui uma bomba e você deve continuar procurando;
-        /// - Vitoria (1) caso encontre todas as casas que não possuem bomba.
-        /// Como nosso jogo é baseado em um tabuleiro 9 x 9, informe valores dentro deste intervalo.
-        /// </summary>
-        /// <param name="linha"></param>
-        /// <param name="coluna"></param>
-        public void Abrir(int linha, int coluna)
-        {
-            if (linha >= 1 && linha <= 9 && coluna >= 1 && coluna <= 9)
-            {
-                linha--;
-                coluna--;
-
-                if (Status == StatusTipo.GameOver || Solucao[linha, coluna] == "*")
+                for (int b = 0; b < (linha * coluna) / 6;) //*bombas aleatórias em um sexto do campo minado//*
                 {
-                    Jogo[linha, coluna] = Solucao[linha, coluna];
-                    Status = StatusTipo.GameOver;
-                }
-                else
-                {
-                    if (Jogo[linha, coluna] == "-" && Solucao[linha, coluna] != "0")
+                    m = bomba.Next(0, linha);
+                    l = bomba.Next(0, coluna);  //*bomba.Next = declaração na forma Random//*
+
+                    if (casa[m, l].getBombas() == false)
                     {
-                        Jogo[linha, coluna] = Solucao[linha, coluna];
-                        JogoTotalDeCasasAbertas++;
-                    }
-                    else if (Jogo[linha, coluna] == "-" && Solucao[linha, coluna] == "0")
-                    {
-                        if (Jogo[4, 0] == "-")
-                        {
-                            Jogo[4, 0] = Solucao[4, 0];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[4, 1] == "-")
-                        {
-                            Jogo[4, 1] = Solucao[4, 1];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[4, 2] == "-")
-                        {
-                            Jogo[4, 2] = Solucao[4, 2];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[5, 2] == "-")
-                        {
-                            Jogo[5, 2] = Solucao[5, 2];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[5, 3] == "-")
-                        {
-                            Jogo[5, 3] = Solucao[5, 3];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[6, 3] == "-")
-                        {
-                            Jogo[6, 3] = Solucao[6, 3];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[6, 4] == "-")
-                        {
-                            Jogo[6, 4] = Solucao[6, 4];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[6, 5] == "-")
-                        {
-                            Jogo[6, 5] = Solucao[6, 5];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[6, 6] == "-")
-                        {
-                            Jogo[6, 6] = Solucao[6, 6];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[6, 7] == "-")
-                        {
-                            Jogo[6, 7] = Solucao[6, 7];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[7, 7] == "-")
-                        {
-                            Jogo[7, 7] = Solucao[7, 7];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        if (Jogo[7, 8] == "-")
-                        {
-                            Jogo[7, 8] = Solucao[7, 8];
-                            JogoTotalDeCasasAbertas++;
-                        }
-
-                        Jogo[5, 0] = "0";
-                        Jogo[5, 1] = "0";
-                        Jogo[6, 0] = "0";
-                        Jogo[6, 1] = "0";
-                        Jogo[6, 2] = "0";
-                        Jogo[7, 0] = "0";
-                        Jogo[7, 1] = "0";
-                        Jogo[7, 2] = "0";
-                        Jogo[7, 3] = "0";
-                        Jogo[7, 4] = "0";
-                        Jogo[7, 5] = "0";
-                        Jogo[7, 6] = "0";
-                        Jogo[8, 0] = "0";
-                        Jogo[8, 1] = "0";
-                        Jogo[8, 2] = "0";
-                        Jogo[8, 3] = "0";
-                        Jogo[8, 4] = "0";
-                        Jogo[8, 5] = "0";
-                        Jogo[8, 6] = "0";
-                        Jogo[8, 7] = "0";
-                        Jogo[8, 8] = "0";
-                        JogoTotalDeCasasAbertas += 21;
+                        casa[m, l].setBombas();
+                        b++;
                     }
 
-                    if (JogoTotalDeCasasAbertas == 71)
+                    for (x = 0; x < linha; x++)
                     {
-                        Status = StatusTipo.Vitoria;
+                        for (y = 0; y < coluna; y++)
+                        {
+                            if (casa[x, y].getBombas() == true)
+                                Console.Write(" X ");
+                            else
+                            {
+
+                                if (casa[x, y].getBombas() == false)
+                                    Console.Write(" * ");
+                            }
+                        }
+                        Console.Write("\n"); //* comando para pular linha e deixar na forma de tabuleiro//*
+
+                        while (casa[x, y].getBombas() == false)
+                        {
+                            //Canto superior esquerdo
+                            if (x == 0 && y == 0)
+                            {
+
+                                if ((casa[x, y + 1].getBombas() == true))
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y + 1].getBombas() == true))
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y].getBombas() == true))
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                casa[x, y].getValor();
+
+                            }
+                            //canto inferior esquerdo
+                            if (x == linha - 1 && y == 0)
+                            {
+
+                                if ((casa[x - 1, y].getBombas() == true))
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x - 1, y + 1].getBombas() == true))
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x, y + 1].getBombas() == true))
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                casa[x, y].getValor();
+                            }
+
+                            //Canto superior direito
+                            if (x == 0 && y == coluna - 1)
+                            {
+
+                                if ((casa[x, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                casa[x, y].getValor();
+
+                            }
+
+                            //Canto inferior direito
+                            if (x == linha - 1 && y == coluna - 1)
+                            {
+                                if ((casa[x - 1, y].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x - 1, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                casa[x, y].getValor();
+
+
+                            }
+                            //Campos na parte superior do campo
+                            for (int j = 1; j < coluna - 1; j++)
+                            {
+
+                                if (x == 0 && y == j)
+                                {
+                                    if ((casa[x, (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), y].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[x, (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    casa[x, y].getValor();
+
+
+
+                                }
+                            }
+
+                            //Campos na parte inferior do campo
+                            for (int j = 1; j < coluna - 1; j++)
+                            {
+
+                                if (x == linha - 1 && y == j)
+                                {
+                                    if ((casa[x, (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x - 1), (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x - 1), y].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x - 1), (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[x, (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    casa[x, y].getValor();
+
+
+
+                                }
+                            }
+
+                            //Valores na lateral esquerda do campo
+
+                            for (int j = 1; j < linha - 1; j++)
+                            {
+                                if (y == 0 && x == j)
+                                {
+                                    if ((casa[(x - 1), y].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x - 1), (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[x, (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), y].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), (y + 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    casa[x, y].getValor();
+
+                                }
+                            }
+
+                            //Valores na lateral direita do campo
+
+                            for (int j = 1; j < linha - 1; j++)
+                            {
+                                if (y == coluna - 1 && x == j)
+                                {
+                                    if ((casa[(x - 1), y].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x - 1), (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[x, (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), (y - 1)].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    if ((casa[(x + 1), y].getBombas()) == true)
+                                    {
+                                        casa[x, y].setValor();
+                                    }
+                                    casa[x, y].getBombas();
+
+                                }
+                            }
+
+
+                            //Campos restantes
+
+                            if (x > 0 && x < linha - 1 && y > 0 && y < coluna - 1)
+                            {
+                                if ((casa[x - 1, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y - 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x + 1, y + 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x, y + 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x - 1, y + 1].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                if ((casa[x - 1, y].getBombas()) == true)
+                                {
+                                    casa[x, y].setValor();
+                                }
+                                casa[x, y].getValor();
+
+                            }
+                        }
+                    }
+
+
+
+                    while (casa[m, l].getBombas() == false)
+
+                        Console.WriteLine("Digite a linha:");
+                    int lin = int.Parse(Console.ReadLine());
+
+                    Console.WriteLine("Digite a coluna:");
+                    int col = int.Parse(Console.ReadLine());
+
+
+                    if (lin < linha && col < coluna)
+                    {
+                        if (linha >= 0)
+                        {
+                            if (casa[lin - 1, col - 1].getBombas() == true)
+                            {
+                                Console.WriteLine("BUUMMM! GAME OVER");
+                                casa[lin - 1, col - 1].setBombas();
+                            }
+                            else
+                            {
+                                Console.WriteLine("Não tem bomba! Jogue novamente!");
+                                Console.WriteLine("");
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                        Console.WriteLine("A linha ou a coluna está saindo da matriz");
+                        Console.WriteLine("");
                     }
                 }
             }
         }
     }
 }
+
+
+
+
+
